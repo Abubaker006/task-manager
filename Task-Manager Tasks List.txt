@@ -1,0 +1,10 @@
+Day-1:
+1- Step design login pages and then add authentication.
+2- Add Backend apis to handle the login and sign.
+3-Test the functionality.
+4-Creating Project functionality.
+
+Day-2:
+
+1- Dashboard Add Kanban.
+2-Other things like account management settings and etc.
