@@ -1,4 +1,3 @@
-import LandingPageHeader from "@/components/LandingPage/LandingPageHeader";
 import "./globals.css";
 
 export const metadata = {
@@ -12,7 +11,6 @@ export default function RootLayout({ children }) {
       <body
         className={`antialiased`}
       >
-        <LandingPageHeader/>
         {children}
       </body>
     </html>
