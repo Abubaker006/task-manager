@@ -1,9 +1,5 @@
 import bycrpt from "bcrypt";
-import env from "dotenv";
 
-env.config();
-
-// const saltRounds = parseInt(process.env.SALT_ROUNDS, 10) || 10; 
 const saltRounds = 10;
 const hashValue = async (value) => {
   const salt = await bycrpt.genSalt(saltRounds);

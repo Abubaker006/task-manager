@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Task-Manager",
+  title: "Taskify",
   description: "Under Development",
 };
 

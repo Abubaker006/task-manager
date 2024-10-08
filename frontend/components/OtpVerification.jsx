@@ -3,20 +3,21 @@ import React, { useState, useEffect, useRef } from "react";
 import { useFormik } from "formik";
 import { otpVerificationSchema } from "@/schemas/index";
 import { message } from "antd";
-import { verifyOtp } from "../app/api/apiServices";
+import { verifyOtp, requestOtp } from "../app/api/apiServices";
 import Cookies from "js-cookie";
+import { ClipLoader } from "react-spinners";
 
 const MAX_INPUT_OTP = 6;
 const MAX_TIME = 300;
 const MAX_ATTEMPTS = 3;
 
-const OtpVerification = ({ goBackProp }) => {
+const OtpVerification = ({ goBackProp, verifyOtpProp }) => {
     const [otp, setOtp] = useState(Array(MAX_INPUT_OTP).fill(""));
     const otpInputRef = useRef([]);
     const [attempts, setAttempts] = useState(0);
     const [timeLeft, setTimeLeft] = useState(MAX_TIME);
     const [isTokenExpired, setIsTokenExpired] = useState(false);
-  
+    const [IsResendingCode, setIsResendingCode] = useState(false);
 
     useEffect(() => {
         if (timeLeft > 0) {
@@ -75,100 +76,44 @@ const OtpVerification = ({ goBackProp }) => {
     };
     const handleVerifyOTP = async (otp) => {
         if (!isTokenExpired) {
-        //   const email = localStorage.getItem("email"); 
-        const email = Cookies.get("email");
-          if (!email) {
-            console.log("Email not found in local storage");
-            return;
-          }
-        
-          const result = await verifyOtp(email, otp);
-        
-          if (result.success) {
-            console.log("OTP Verified");
-            setOtp(Array(MAX_INPUT_OTP).fill(""));
-            otpVerificationFormik.resetForm();     
-            message.success(result.message);
-        
-            setTimeout(() => {
-              handleGoBackBtn(); 
-            }, 2000);
-        
-          } else {
-            setAttempts(attempts + 1); 
-            if (attempts + 1 >= MAX_ATTEMPTS) {
-              setTimeout(() => {
-                handleGoBackBtn(); 
-              }, 1000);
-              message.error("Max limit reached!");
-            } else {
-              message.error(result.message);
-              setOtp(Array(MAX_INPUT_OTP).fill("")); 
-              otpVerificationFormik.resetForm();     
-              otpInputRef.current[0]?.focus();       
+            const email = Cookies.get("email");
+            if (!email) {
+                console.log("Email not found stored");
+                return;
             }
-          }
+
+            const result = await verifyOtp(email, otp);
+
+            if (result.success) {
+                console.log("OTP Verified");
+                setOtp(Array(MAX_INPUT_OTP).fill(""));
+                otpVerificationFormik.resetForm();
+                message.success(result.message);
+
+                setTimeout(() => {
+                    verifyOtpProp(true);
+                }, 2000);
+
+            } else {
+                setAttempts(attempts + 1);
+                if (attempts + 1 >= MAX_ATTEMPTS) {
+                    setTimeout(() => {
+                        handleGoBackBtn();
+                        verifyOtpProp(false);
+                    }, 1000);
+                    message.error("Max limit reached!");
+                } else {
+                    message.error(result.message);
+                    setOtp(Array(MAX_INPUT_OTP).fill(""));
+                    otpVerificationFormik.resetForm();
+                    otpInputRef.current[0]?.focus();
+                }
+            }
         } else {
-          message.error("Token expired");
+            message.error("Token expired");
         }
-      };
-    // const handleVerifyOTP = async (otp) => {
-    //     if (!isTokenExpired) {
-    //         const email = localStorage.getItem("email"); 
-    //         if (!email) {
-    //             console.log("Email not found in local storage");
-    //             return;
-    //         }
-    
-    //         try {
-    //             const response = await axios.post(
-    //                 `${backendBaseUrl}/api/verify-otp`,
-    //                 {
-    //                     email: email, 
-    //                     otp: otp,     
-    //                 },
-    //                 {
-    //                     headers: {
-    //                         "Content-Type": "application/json" 
-    //                     }
-    //                 }
-    //             );
-    
-                 
-    //             if (response.status===200) {
-    //                 console.log("OTP Verified");
-    //                 setOtp(Array(MAX_INPUT_OTP).fill(""));
-    //                 otpVerificationFormik.resetForm();     
-    //                 message.success("OTP Verified");
-    
-      
-    //                 setTimeout(() => {
-    //                     handleGoBackBtn(); 
-    //                 }, 2000);
-    
-    //             } else {
-    //                 setAttempts(attempts + 1); 
-    //                 if (attempts + 1 >= MAX_ATTEMPTS) {
-    //                     setTimeout(() => {
-    //                         handleGoBackBtn(); 
-    //                     }, 1000);
-    //                     message.error("Max limit reached!");
-    //                 } else {
-    //                     message.error("Invalid OTP.");
-    //                     setOtp(Array(MAX_INPUT_OTP).fill("")); 
-    //                     otpVerificationFormik.resetForm();     
-    //                     otpInputRef.current[0]?.focus();       
-    //                 }
-    //             }
-    //         } catch (error) {
-    //             console.error("Error encountered in verifying OTP", error);
-    //             message.error("Error in Verifying OTP. Please try again.");
-    //         }
-    //     } else {
-    //         message.error("Token expired");
-    //     }
-    // };
-    
+    };
+
     const handleKeyDown = (e, index) => {
         if (e.key === "Backspace") {
             handleOtpChange({ target: { value: "" } }, index);
@@ -178,16 +123,16 @@ const OtpVerification = ({ goBackProp }) => {
 
     const handlePaste = (e) => {
         const pasteData = e.clipboardData.getData("Text");
-    
+
         if (/^\d{6}$/.test(pasteData)) {
-  
+
             setOtp(pasteData.split(""));
             e.preventDefault();
-    
-            otpVerificationFormik.setFieldValue("otp", pasteData); 
+
+            otpVerificationFormik.setFieldValue("otp", pasteData);
             otpVerificationFormik.validateField("otp").then((error) => {
                 if (!error) {
-                    otpVerificationFormik.submitForm(); 
+                    otpVerificationFormik.submitForm();
                 } else {
                     console.log("Validation error:", error);
                 }
@@ -201,6 +146,28 @@ const OtpVerification = ({ goBackProp }) => {
         goBackProp(false);
     };
 
+    const handleResendCode = async () => {
+        const email = Cookies.get("email");
+        setIsResendingCode(true);
+        try {
+            if (email) {
+            
+                const result = await requestOtp(email);
+                if (result.success) {
+                    message.success("Verification Code sent to your email");
+                    setIsResendingCode(false);
+                    setTimeLeft(MAX_TIME);
+                    setAttempts(0);
+                    setIsTokenExpired(false);
+                }
+            } else {
+                setIsResendingCode(true);
+                console.error("Error in resending the code to required email");
+            }
+        } catch (error) {
+            console.error("Error in resending the code");
+        }
+    }
 
     return (
         <>
@@ -238,7 +205,9 @@ const OtpVerification = ({ goBackProp }) => {
                         {otp.map((value, index) => (
                             <input
                                 key={index}
-                                type="text"
+                                type="number"
+                                name="otp"
+                                id="otp"
                                 maxLength={1}
                                 value={value}
                                 ref={(el) => (otpInputRef.current[index] = el)}
@@ -246,6 +215,9 @@ const OtpVerification = ({ goBackProp }) => {
                                 onKeyDown={(e) => handleKeyDown(e, index)}
                                 onPaste={(e) => handlePaste(e)}
                                 className="w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150"
+                                autoComplete="off"
+                                pattern="\d*"
+                                inputMode="numeric"
                             />
                         ))}
                     </div>
@@ -259,6 +231,7 @@ const OtpVerification = ({ goBackProp }) => {
 
                 <div className="flex justify-between items-center space-x-4">
                     <button
+                        disabled={otpVerificationFormik.isSubmitting}
                         type="button"
                         className={`w-full py-3 bg-[#0000ff] text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300 ${otpVerificationFormik.isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                         onClick={handleGoBackBtn}
@@ -269,10 +242,12 @@ const OtpVerification = ({ goBackProp }) => {
                     {isTokenExpired && (
                         <button
                             type="button"
-                            className="w-full py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200"
+                            className={`w-full py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200 ${IsResendingCode && "opacity:50 cursor-not-allowed"}`}
                             onClick={handleResendCode}
+                            disabled={IsResendingCode}
+
                         >
-                            Resend Code
+                            {IsResendingCode ? <ClipLoader size={15} color={"#0000ff"} loading={true} /> : (<> Resend Code</>)}
                         </button>
                     )}
                 </div>

@@ -1,10 +1,10 @@
 import express from "express";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
-import env from "dotenv";
 import Otp from "../models/otpSchema.js";
-import { hashValue,compareValue } from "../config/authService.js";
-env.config();
+import { hashValue,compareValue } from "../middleware/authService.js";
+import dotenv from 'dotenv';
+dotenv.config();
 
 const otpRouter = express.Router();
 

@@ -6,14 +6,34 @@ import Link from "next/link";
 import { useFormik } from "formik";
 import { loginSchema } from "@/schemas/index";
 import { ClipLoader } from "react-spinners";
+import { loginUser } from "../api/apiServices";
+import { message } from "antd";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
-const onSubmit = async (values, actions) => {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log(values);
-    actions.resetForm();
-}
+
 
 const SigninPage = () => {
+    const router = useRouter();
+    const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
+
+    const onSubmit = async (values, actions) => {
+        const { email, password } = values;
+        if (email && password) {
+            const response = await loginUser(email, password);
+            if (response.success) {
+                message.success("Login successful");
+                Cookies.set("token", response.token, { expires: 1 });
+                router.replace("/dashboard");
+            } else if (!response.success) {
+                message.error(response.message);
+            }
+        } else {
+            message.error("Please enter email and password");
+            return;
+        }
+        actions.resetForm();
+    }
 
     const { values, errors, touched, isSubmitting, handleSubmit, handleChange, handleBlur } = useFormik({
         initialValues: {
@@ -24,6 +44,13 @@ const SigninPage = () => {
         onSubmit
     });
 
+    const googleLogin = () => {
+        router.push(`${backendBaseUrl}/auth/google`);
+    };
+
+    const facebookLogin = () => {
+        router.push(`${backendBaseUrl}/auth/facebook`);
+    };
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-[#CAE1FF] to-white">
@@ -75,12 +102,13 @@ const SigninPage = () => {
                         type="submit"
                         className={`w-full py-3 bg-[#0000ff] text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                        {isSubmitting ? (<><ClipLoader  size={15} color={"white"} /></>) : (<>Log In</>)}
+                        {isSubmitting ? (<><ClipLoader size={15} color={"white"} /></>) : (<>Log In</>)}
                     </button>
                 </form>
                 <div className="mt-10">
                     <button
-                        type="submit"
+                        onClick={facebookLogin}
+                        type="button"
                         className=" flex items-center justify-center w-full py-3 mt-4 border border-gray-500 bg-white text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition duration-300"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48" className="mr-2">
@@ -91,7 +119,8 @@ const SigninPage = () => {
                     </button>
 
                     <button
-                        type="submit"
+                        onClick={googleLogin}
+                        type="button"
                         className="flex items-center justify-center w-full py-3 mt-4 border border-gray-500 bg-white text-gray-700 font-semibold rounded-lg hover:bg-gray-100 transition duration-300"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48" className="mr-2">
@@ -116,7 +145,7 @@ const SigninPage = () => {
                     <p className="text-gray-600">
                         Don't remember your password?{" "}
                         <Link
-                            href="/signup"
+                            href="/forgot-password"
                             className="text-blue-600 hover:underline"
                         >
                             Click here to reset it!

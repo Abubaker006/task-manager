@@ -10,8 +10,6 @@ import SliderComponent from "@/components/LandingPage/SliderComponent";
 import Link from "next/link";
 import ButtonHandler from "@/components/LandingPage/ButtonHandler";
 
-import LandingPageForm from "./LandingPageForm";
-
 const MainBodyLandingPage = () => {
 
     return (
@@ -170,9 +168,11 @@ const MainBodyLandingPage = () => {
                     <h1 className="text-white text-4xl lg:text-6xl font-bold">
                         Move fast, stay aligned, and build better - together
                     </h1>
+                    <Link href="/signup">
                     <button className="bg-yellow-500 text-black font-semibold py-3 px-8 rounded-md shadow-lg hover:bg-yellow-600 transition-all">
                         Get it free
                     </button>
+                    </Link>
                 </div>
                 <div className="bg-gray-50 py-12">
                     <h1 className="text-3xl font-semibold text-center text-gray-800 mb-8">
