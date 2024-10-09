@@ -27,11 +27,11 @@ const SignupPage = () => {
   const onSubmit = async (values, actions) => {
     const { email } = values;
     if (!email) {
-      console.error("Email is required");
+      message.error("Please enter your email address");
       return;
     }
 
-    const result = await requestOtp(email);
+    const result = await requestOtp(email,"signup");
     console.log(result.message);
     if (result.success) {
       message.success(result.message);

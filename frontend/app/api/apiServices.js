@@ -2,11 +2,11 @@ import axios from "axios";
 
 const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
 
-export const requestOtp = async (email) => {
+export const requestOtp = async (email, type) => {
   try {
     const response = await axios.post(
       `${backendBaseUrl}/otp/request-otp`,
-      { email },
+      { email, type },
       {
         headers: {
           "Content-Type": "application/json",
@@ -19,11 +19,10 @@ export const requestOtp = async (email) => {
     } else if (response.status === 212) {
       return { success: false, message: "alreadySent" };
     } else {
-      return { success: false, message: "Error in sending OTP" };
+      return { success: false, message: response.data.message };
     }
   } catch (error) {
-    console.error("Error encountered in requesting OTP", error);
-    return { success: false, message: "Error in sending OTP" };
+    return { success: false, message: error.response.data.message };
   }
 };
 
@@ -100,6 +99,30 @@ export const loginUser = async (email, password) => {
     if (error.response && error.response.status === 400) {
       return { success: false, message: "Invalid email or password" };
     }
+    return { success: false, message: "An unexpected error occurred" };
+  }
+};
+
+export const resetPassword = async (email, password, confirmPassword) => {
+  try {
+    const response = await axios.post(
+      `${backendBaseUrl}/auth/reset-password`,
+      {
+        email,
+        password,
+        confirmPassword,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      return { success: true, message: "Password reset successfully" };
+    }
+  } catch (error) {
     return { success: false, message: "An unexpected error occurred" };
   }
 };

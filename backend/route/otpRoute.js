@@ -2,8 +2,9 @@ import express from "express";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 import Otp from "../models/otpSchema.js";
-import { hashValue,compareValue } from "../middleware/authService.js";
-import dotenv from 'dotenv';
+import User from "../models/userSchema.js";
+import { hashValue, compareValue } from "../middleware/authService.js";
+import dotenv from "dotenv";
 dotenv.config();
 
 const otpRouter = express.Router();
@@ -24,13 +25,18 @@ const transporter = nodemailer.createTransport({
 });
 
 otpRouter.post("/request-otp", async (req, res) => {
-  const { email } = req.body;
-
+  const { email,type } = req.body;
   if (!email) {
     return res.status(400).json({ message: "Email is required" });
   }
 
   try {
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser && type === "signup") {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
     const checKEmail = await Otp.findOne({ email });
 
     if (checKEmail) {
@@ -40,9 +46,8 @@ otpRouter.post("/request-otp", async (req, res) => {
     }
 
     const generatedOtp = generateOtp();
-    
-    const otp=await hashValue(generatedOtp);
 
+    const otp = await hashValue(generatedOtp);
 
     const otpDocument = new Otp({
       email,
@@ -51,7 +56,7 @@ otpRouter.post("/request-otp", async (req, res) => {
     });
 
     await otpDocument.save();
-    
+
     const mailOptions = {
       from: process.env.EMAIL,
       to: email,
@@ -140,11 +145,9 @@ otpRouter.post("/verify-otp", async (req, res) => {
       const newAttempts = attempts + 1;
       if (newAttempts === MAX_Attempts) {
         await Otp.deleteOne({ email });
-        return res
-          .status(401)
-          .json({
-            message: "Max Attempts reached. Please request for a new OTP",
-          });
+        return res.status(401).json({
+          message: "Max Attempts reached. Please request for a new OTP",
+        });
       } else {
         await Otp.updateOne({ email }, { attempts: newAttempts });
         return res.status(210).json({ message: "Invalid OTP" });

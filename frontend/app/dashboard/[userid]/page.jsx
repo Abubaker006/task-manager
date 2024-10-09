@@ -1,5 +1,6 @@
+"use client"
 import React from "react";
-import ProtectedRoute from "@/components/authComponents/ProtectedRoute";
+import ProtectedRoute from "../../../components/authComponents/ProtectedRoute";
 const UserDashboardPage = ({ params }) => {
 
     return (

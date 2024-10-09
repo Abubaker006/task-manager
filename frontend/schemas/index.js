@@ -1,6 +1,7 @@
 import * as Yup from "yup";
 
-const passwordRegex = /(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=])/;
+const passwordRegex =
+  /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@#$%^&+=!()\-_*])[A-Za-z\d@#$%^&+=!()\-_*]{8,}$/;
 const spaceRegex = /^(?!.*\s).+$/;
 
 export const emailVerificationSchema = Yup.object().shape({
@@ -29,7 +30,7 @@ export const CompleteSignupSchema = Yup.object().shape({
     .min(8, "Password must be at leat 8 character Long")
     .matches(
       passwordRegex,
-      "Password must contain at least one uppercase letter, one number and one special character(@,#,$,%,^,&,+)"
+      "Password must be at least 8 characters long, include one uppercase letter, one lowercase letter, one number, and one special character (@#$%^&+=!()-_*)."
     )
     .matches(spaceRegex, "Password must not contain any space"),
   confirmPassword: Yup.string().oneOf(
@@ -40,4 +41,19 @@ export const CompleteSignupSchema = Yup.object().shape({
 
 export const forgotPasswordSchema = Yup.object().shape({
   email: Yup.string().email().required("Email is required"),
+});
+
+export const resetForgotPasswordSchema = Yup.object().shape({
+  password: Yup.string()
+    .required("Password is required")
+    .min(8, "Password must be at leat 8 character Long")
+    .matches(
+      passwordRegex,
+      "Password must be at least 8 characters long, include one uppercase letter, one lowercase letter, one number, and one special character (@#$%^&+=!()-_*)."
+    )
+    .matches(spaceRegex, "Password must not contain any space"),
+  confirmPassword: Yup.string().oneOf(
+    [Yup.ref("password"), null],
+    "Passwords must match"
+  ),
 });

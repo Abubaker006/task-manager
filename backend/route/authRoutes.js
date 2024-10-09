@@ -80,13 +80,11 @@ authRouter.post("/signup", async (req, res) => {
     newUser.tokens.push(token);
     await newUser.save();
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        token: token,
-        message: "User registered successfully",
-      });
+    return res.status(200).json({
+      success: true,
+      token: token,
+      message: "User registered successfully",
+    });
   } catch (error) {
     console.error("Error encountered in registering user", error);
     return res
@@ -119,6 +117,43 @@ authRouter.post("/logout", async (req, res) => {
   } catch (error) {
     console.error("Error during logout", error);
     return res.status(500).json({ message: "Internal server error" });
+  }
+});
+authRouter.post("/reset-password", async (req, res) => {
+  const { email, password, confirmPassword } = req.body;
+
+  if (!email || !password || !confirmPassword) {
+    res.status(400).json({ message: "All fields are required" });
+  }
+  if (password !== confirmPassword) {
+    res.status(400).json({ message: "Passwords do not match" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      res.status(400).json({ message: "User not found" });
+    }
+
+    const hashedPassword = await hashValue(password);
+
+    if (!hashedPassword) {
+      throw new Error("Internal Server Error");
+    }
+
+    const result = await User.findOneAndUpdate(
+      { email },
+      { password: hashedPassword },
+      { new: true }
+    );
+
+    if (!result) {
+      res.status(400).json({ message: "Error updating password" });
+    }
+    res.status(200).json({ message: "Password reset successful" });
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
