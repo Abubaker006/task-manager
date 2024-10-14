@@ -32,7 +32,6 @@ const SignupPage = () => {
     }
 
     const result = await requestOtp(email,"signup");
-    console.log(result.message);
     if (result.success) {
       message.success(result.message);
       setEmail(email);

@@ -1,4 +1,6 @@
 import AuthProvider from '@/components/authComponents/AuthProvider';
+import store from '@/store/store';
+
 
 export const metadata = {
     title: "Taskify-Dashboard",
@@ -9,7 +11,8 @@ export default function RootLayout({ children }) {
         <html lang="en">
             <body>
                 <AuthProvider>
-                    {children}
+                        {children}
+         
                 </AuthProvider>
             </body>
         </html>

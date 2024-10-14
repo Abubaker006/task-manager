@@ -10,7 +10,6 @@ const useAuth = () => {
 
   useEffect(() => {
     const token = getAuthToken();
-    console.log("Token is use  auth",token);
     if (token) {
       setIsAuthenticated(true);
     } else {

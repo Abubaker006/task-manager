@@ -64,12 +64,12 @@ export const registerUser = async (name, email, password) => {
         },
       }
     );
-    console.log(response);
     if (response.status === 200) {
       return {
         success: true,
         message: "User registered successfully",
         token: response.data.token,
+        userId: response.data.userId,
       };
     } else {
       return { success: false, message: "Error in registering user" };
@@ -93,6 +93,7 @@ export const loginUser = async (email, password) => {
         success: true,
         message: "User logged in successfully",
         token: response.data.token,
+        userId: response.data.userId,
       };
     }
   } catch (error) {
@@ -124,5 +125,42 @@ export const resetPassword = async (email, password, confirmPassword) => {
     }
   } catch (error) {
     return { success: false, message: "An unexpected error occurred" };
+  }
+};
+
+export const fetchWorkspaces = async (userId, token) => {
+  try {
+    const response = await axios.post(
+      `${backendBaseUrl}/dashboard/get-workspaces`,
+      {
+        userId,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    
+    if (response.status === 200) {
+      return {
+        success: true,
+        message: "Data fetched sucessfully",
+        data: response.data,
+      };
+    }
+  } catch (error) {
+    return { sucess: false, message:  error.response.data.message };
+  }
+};
+
+export const createWorkspace = async (name, description, token) => {
+  try {
+    if (!name || !token) {
+      return { sucess: false, message: "Fill in all the required fields" };
+    }
+  } catch (error) {
+    return { sucess: false, message: "An unexpected error occurred" };
   }
 };

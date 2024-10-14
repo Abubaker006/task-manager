@@ -40,7 +40,12 @@ authRouter.post("/login", async (req, res) => {
 
     return res
       .status(200)
-      .json({ success: true, token: token, message: "Login successful" });
+      .json({
+        success: true,
+        token: token,
+        userId: user._id,
+        message: "Login successful",
+      });
   } catch (error) {
     console.error("Error during login", error);
     return res
@@ -83,6 +88,7 @@ authRouter.post("/signup", async (req, res) => {
     return res.status(200).json({
       success: true,
       token: token,
+      userId: newUser._id,
       message: "User registered successfully",
     });
   } catch (error) {
@@ -93,7 +99,7 @@ authRouter.post("/signup", async (req, res) => {
   }
 });
 
-//sign In route
+//sign out route
 authRouter.post("/logout", async (req, res) => {
   const token = req.header("Authorization")?.replace("Bearer ", "");
 
@@ -119,6 +125,7 @@ authRouter.post("/logout", async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+// reset password route
 authRouter.post("/reset-password", async (req, res) => {
   const { email, password, confirmPassword } = req.body;
 
@@ -133,7 +140,7 @@ authRouter.post("/reset-password", async (req, res) => {
     const user = await User.findOne({ email });
 
     if (!user) {
-      res.status(400).json({ message: "User not found" });
+     return res.status(400).json({ message: "User not found" });
     }
 
     const hashedPassword = await hashValue(password);
@@ -149,11 +156,11 @@ authRouter.post("/reset-password", async (req, res) => {
     );
 
     if (!result) {
-      res.status(400).json({ message: "Error updating password" });
+     return res.status(400).json({ message: "Error updating password" });
     }
-    res.status(200).json({ message: "Password reset successful" });
+    return res.status(200).json({ message: "Password reset successful" });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
 

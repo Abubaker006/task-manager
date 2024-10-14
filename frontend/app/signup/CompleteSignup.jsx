@@ -26,7 +26,6 @@ const CompleteSignup = () => {
     };
 
     const onSubmit = async (values, actions) => {
-        console.log("Submitting form with values", values);
         const { name, password } = values;
     
         try {
@@ -35,6 +34,7 @@ const CompleteSignup = () => {
                 if(response.success===true){
                     message.success("User registered successfully");
                     Cookies.set('token', response.token, { expires: 1 });
+                    Cookies.set("userId", response.userId, { expires: 1 });
                     router.replace("/dashboard");
                 }else{
                     message.error("User Not Registerd");

@@ -12,7 +12,6 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 
 
-
 const SigninPage = () => {
     const router = useRouter();
     const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
@@ -24,6 +23,7 @@ const SigninPage = () => {
             if (response.success) {
                 message.success("Login successful");
                 Cookies.set("token", response.token, { expires: 1 });
+                Cookies.set("userId", response.userId, { expires: 1 });
                 router.replace("/dashboard");
             } else if (!response.success) {
                 message.error(response.message);

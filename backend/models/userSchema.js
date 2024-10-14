@@ -1,30 +1,36 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-    facebookId:{
-     type:String
+  facebookId: {
+    type: String,
+  },
+  googleId: {
+    type: String,
+  },
+  name: {
+    required: true,
+    type: String,
+  },
+  email: {
+    required: function () {
+      return !this.facebookId && !this.googleId;
     },
-    googleId:{
-  type:String
+    type: String,
+    unique: true,
+  },
+  password: {
+    required: function () {
+      return !this.facebookId && !this.googleId;
     },
-    name:{
-        required:true,
-        type:String,
+    type: String,
+  },
+  tokens: [String],
+  workspaces: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Workspace",
     },
-    email:{
-        required: function() {
-            return !this.facebookId && !this.googleId;
-          },
-        type:String,
-        unique:true,
-    },
-    password:{
-        required:function(){
-            return !this.facebookId && !this.googleId
-        },
-        type:String,
-    },
-    tokens:[String]
+  ],
 });
 
 const User = mongoose.model("User", userSchema);

@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import otpRouter from "./route/otpRoute.js";
 import authRouter from "./route/authRoutes.js";
+import dashboardRouter from "./route/dashboardRoute.js";
 import connectDB from "./config/db.js";
 import authenticateToken from "./middleware/authMiddleware.js";
 import passport from "passport";
@@ -11,7 +12,6 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import MongoStore from "connect-mongo";
 import "./config/passportConfig.js";
-
 
 dotenv.config();
 const app = express();
@@ -42,13 +42,12 @@ app.use(passport.initialize());
 
 app.use("/otp", otpRouter);
 app.use("/auth", authRouter);
+app.use("/dashboard", authenticateToken, dashboardRouter);
 
 app.get("/protected", authenticateToken, (req, res) => {
-  res
-    .status(200)
-    .json({
-      message: "This is a protected route, accessible only with a valid token.",
-    });
+  res.status(200).json({
+    message: "This is a protected route, accessible only with a valid token.",
+  });
 });
 
 app.get("/", (req, res) => {

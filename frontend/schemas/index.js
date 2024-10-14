@@ -57,3 +57,10 @@ export const resetForgotPasswordSchema = Yup.object().shape({
     "Passwords must match"
   ),
 });
+
+
+export const workspaceSchema = Yup.object().shape({
+  name:Yup.string().required("Workspace name is required").
+  min(5,"Workspace name must be at least 5 characters long").max(50,"Workspace name must be at most 50 characters long"),
+  description:Yup.string().required("Workspace description is required")
+});

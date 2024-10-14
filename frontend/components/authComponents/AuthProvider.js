@@ -10,9 +10,7 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     const handleAuth = async () => {
       const query = new URLSearchParams(window.location.search);
-      console.log("query", query);
       const token = query.get("token");
-      console.log(token);
       if (token) {
         Cookies.set("token", token, { path: "/" });
         window.history.replaceState(
