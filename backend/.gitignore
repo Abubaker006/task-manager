@@ -32,3 +32,5 @@ npm-debug.log
 .DS_Store
 
 .env
+
+Client Secret and Id for Google.json
